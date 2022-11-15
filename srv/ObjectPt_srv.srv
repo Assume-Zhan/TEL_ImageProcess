@@ -1,0 +1,5 @@
+bool catchBlockPts
+---
+bool CatchObj
+string blockName
+geometry_msgs/PoseArray BlockPts
