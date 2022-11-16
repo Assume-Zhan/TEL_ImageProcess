@@ -6,6 +6,13 @@
 
 #include "block_detector/ObjectPt_srv.h"
 
+#define MAX_COL_CAM 546
+#define FILE_NAME_CAM_TF "/home/assume/Desktop/TLE_Navigation/\
+src/block_detector/transform/coordinate_tf.csv"
+
+#define _cam_ first
+#define _world_ second
+
 using bdr_srv = block_detector::ObjectPt_srv;
 
 class BlockDetector{
@@ -46,7 +53,7 @@ private:
      * @param preprocessed preprocessed image
      * @return std::map <char, std::pair<int, int>>
      */
-    std::map <char, std::pair<int, int>> blocks_catch(cv::Mat preprocessed);
+    std::multimap<char, cv::Point2f> blocks_catch(cv::Mat preprocessed);
 
     /**
      * @brief Transform frame points to world points
@@ -54,12 +61,21 @@ private:
      * @param blocks Frame point of blocks
      * @return std::map <char, std::pair<int, int>>
      */
-    std::map <char, std::pair<int, int>> transformation(std::map <char, std::pair<int, int>> blocks);
+    std::multimap<char, cv::Point2d> transformation(std::multimap<char, cv::Point2f> blocks);
 
+    /**
+     * @brief Get the tf points object
+     *
+     * @param filename
+     */
+    void get_tf_points(std::string filename);
 
     ros::NodeHandle nh_;
     ros::ServiceServer srv_camera_state_;
 
     std::pair<cv::Scalar, cv::Scalar> dark_hsv_min_max_; // HSV {min, max}
     std::pair<cv::Scalar, cv::Scalar> light_hsv_min_max_;
+
+    std::pair<double, double> cam_world_x[MAX_COL_CAM];
+    std::pair<double, double> cam_world_y[MAX_COL_CAM];
 };
