@@ -15,6 +15,12 @@ public:
 
     ~BlockDetector(){}
 
+    /**
+     * @brief Just for debugging
+     *
+     */
+    void debug();
+
 private:
 
     /**
@@ -53,4 +59,7 @@ private:
 
     ros::NodeHandle nh_;
     ros::ServiceServer srv_camera_state_;
+
+    std::pair<cv::Scalar, cv::Scalar> dark_hsv_min_max_; // HSV {min, max}
+    std::pair<cv::Scalar, cv::Scalar> light_hsv_min_max_;
 };

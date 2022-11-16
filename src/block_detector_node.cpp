@@ -9,5 +9,7 @@ int main(int argc, char** argv){
     ros::NodeHandle nh_("block_detector_node");
 
     BlockDetector bdr(nh_);
+    bdr.debug();
 
+    // ros::spin();
 }
