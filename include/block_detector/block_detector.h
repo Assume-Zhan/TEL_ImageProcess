@@ -51,7 +51,7 @@ private:
      * @brief Detect the blocks
      *
      * @param preprocessed preprocessed image
-     * @return std::map <char, std::pair<int, int>>
+     * @return std::multimap <char, std::pair<int, int>>
      */
     std::multimap<char, cv::Point2f> blocks_catch(cv::Mat preprocessed);
 
@@ -61,7 +61,7 @@ private:
      * @param blocks Frame point of blocks
      * @return std::map <char, std::pair<int, int>>
      */
-    std::multimap<char, cv::Point2d> transformation(std::multimap<char, cv::Point2f> blocks);
+    std::map<char, cv::Point2d> transformation(std::multimap<char, cv::Point2f> blocks);
 
     /**
      * @brief Get the tf points object
@@ -72,6 +72,8 @@ private:
 
     ros::NodeHandle nh_;
     ros::ServiceServer srv_camera_state_;
+
+    int captured_times = 1;
 
     std::pair<cv::Scalar, cv::Scalar> dark_hsv_min_max_; // HSV {min, max}
     std::pair<cv::Scalar, cv::Scalar> light_hsv_min_max_;

@@ -6,13 +6,31 @@ BlockDetector::BlockDetector(ros::NodeHandle& nh): nh_(nh){
     srv_camera_state_ = nh.advertiseService("getObjectPts", &BlockDetector::camera_srv_cb, this);
 
     this->dark_hsv_min_max_ = {cv::Scalar(98, 62, 105), cv::Scalar(132, 255, 255)};
-    this->light_hsv_min_max_ = {cv::Scalar(94, 79, 81), cv::Scalar(108, 255, 245)};
+    this->light_hsv_min_max_ = {cv::Scalar(78, 64, 120), cv::Scalar(96, 198, 255)};
     this->get_tf_points(FILE_NAME_CAM_TF);
 }
 
+
 bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res){
+    // Open the camera
+    cv::VideoCapture camera(0); // TODO : modularize the camera index
+    cv::Mat frame;
+
+
+    for(int times = 0; times < this->captured_times; times++){
+        bool ret = camera.read(frame);
+        std::map<char, cv::Point2d> block_point_world;
+        block_point_world = this->transformation(this->blocks_catch(this->preprocess(frame)));
+        ROS_INFO_STREAM("Time " << times << ":");
+        for(auto x : block_point_world){
+            ROS_INFO_STREAM("   Block : " << x.first << " , at : " << x.second);
+        }
+    }
+
+
     return true;
 }
+
 
 cv::Mat BlockDetector::preprocess(cv::Mat frame){
     // preprocess the raw frame from camera 
@@ -50,6 +68,7 @@ cv::Mat BlockDetector::preprocess(cv::Mat frame){
 
 }
 
+
 std::multimap<char, cv::Point2f> BlockDetector::blocks_catch(cv::Mat preprocessed_img){
 
     // Find contours
@@ -63,7 +82,7 @@ std::multimap<char, cv::Point2f> BlockDetector::blocks_catch(cv::Mat preprocesse
 
         // Filter some small area
         double area = cv::contourArea(contours[i]);
-        if(area <= 1000) continue; // TODO : modularize the area size
+        if(area <= 100) continue; // TODO : modularize the area size
 
         // Use arc length to set proper epsilon
         double arcLen = cv::arcLength(contours[i], true);
@@ -123,8 +142,9 @@ std::multimap<char, cv::Point2f> BlockDetector::blocks_catch(cv::Mat preprocesse
     return block_positions;
 }
 
-std::multimap<char, cv::Point2d> BlockDetector::transformation(std::multimap<char, cv::Point2f> blocks){
-    std::multimap<char, cv::Point2d> Positions;
+
+std::map<char, cv::Point2d> BlockDetector::transformation(std::multimap<char, cv::Point2f> blocks){
+    std::map<char, cv::Point2d> Positions;
 
     for(auto block : blocks){
         // Set goal x y
@@ -142,11 +162,17 @@ std::multimap<char, cv::Point2d> BlockDetector::transformation(std::multimap<cha
             }
         }
 
-        Positions.insert({block.first, cv::Point2d{proper_x, proper_y}});
+        if(Positions.find(block.first) == Positions.end()){
+            Positions.insert({block.first, cv::Point2d{proper_x, proper_y}});
+        }
+        else if(Positions[block.first].y < proper_y){
+            Positions.insert({block.first, cv::Point2d{proper_x, proper_y}});
+        }
     }
 
     return Positions;
 }
+
 
 void BlockDetector::get_tf_points(std::string filePath){
     std::ifstream tf_file(filePath);
@@ -169,12 +195,14 @@ void BlockDetector::get_tf_points(std::string filePath){
     }
 }
 
+
 void BlockDetector::debug(){
     cv::VideoCapture camera(0);
     cv::Mat frame;
 
     while(true){
         bool ret = camera.read(frame);
+        cv::imshow("origin_frame", frame);
 
         // Preprocess the frame
         frame = this->preprocess(frame);
@@ -184,7 +212,7 @@ void BlockDetector::debug(){
 
         char event = cv::waitKey(1);
         if(event == 'w'){
-            std::multimap<char, cv::Point2d> block_point_world = this->transformation(block_point_cam);
+            std::map<char, cv::Point2d> block_point_world = this->transformation(block_point_cam);
             for(auto x : block_point_world){
                 ROS_INFO_STREAM("Block : " << x.first << " , at : " << x.second);
             }
