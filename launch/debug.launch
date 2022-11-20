@@ -1,0 +1,33 @@
+<launch>
+
+    <node pkg="block_detector" type="block_detector_node" name="block_detector_node" output="screen">
+        <param name="debugMode" value="true"/>
+        
+        <param name="tf_file_name" value="/home/assume/Desktop/TLE_Navigation/src/block_detector/transform/coordinate_tf.csv"/>
+
+        <param name="camera_index" value="0"/>
+        <param name="min_area_size" value="100"/>
+        <param name="contour_epsilon_mul" value="0.02"/>
+        <param name="captured_times" value="1"/>
+
+        <param name="dark_h_min" value="98"/>
+        <param name="dark_s_min" value="62"/>
+        <param name="dark_v_min" value="105"/>
+        <param name="dark_h_max" value="132"/>
+        <param name="dark_s_max" value="255"/>
+        <param name="dark_v_max" value="255"/>
+        <param name="light_h_min" value="78"/>
+        <param name="light_s_min" value="64"/>
+        <param name="light_v_min" value="120"/>
+        <param name="light_h_max" value="96"/>
+        <param name="light_s_max" value="198"/>
+        <param name="light_v_max" value="255"/>
+
+        <param name="threshold_canny_1" value="15"/>
+        <param name="threshold_canny_2" value="10"/>
+
+        <param name="threshold_min" value="50"/>
+        <param name="threshold_max" value="255"/>
+    </node>
+
+</launch>
