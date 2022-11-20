@@ -5,10 +5,9 @@
 #include <map>
 
 #include "block_detector/ObjectPt_srv.h"
+#include "geometry_msgs/Pose.h"
 
-#define MAX_COL_CAM 546
-#define FILE_NAME_CAM_TF "/home/assume/Desktop/TLE_Navigation/\
-src/block_detector/transform/coordinate_tf.csv"
+#define MAX_COL_CAM 630
 
 #define _cam_ first
 #define _world_ second
@@ -27,6 +26,8 @@ public:
      *
      */
     void debug();
+
+    void holdOnFunc();
 
 private:
 
@@ -73,11 +74,43 @@ private:
     ros::NodeHandle nh_;
     ros::ServiceServer srv_camera_state_;
 
-    int captured_times = 1;
 
     std::pair<cv::Scalar, cv::Scalar> dark_hsv_min_max_; // HSV {min, max}
     std::pair<cv::Scalar, cv::Scalar> light_hsv_min_max_;
 
     std::pair<double, double> cam_world_x[MAX_COL_CAM];
     std::pair<double, double> cam_world_y[MAX_COL_CAM];
+
+    // DEBUGMODE : debug image
+    cv::Mat debug_image;
+
+    // Parameter get by ros_param
+    bool debugMode_ = false;
+
+    int cam_index_ = 2;
+    double min_area_size_ = 100;
+    double contour_epsilon_mul_ = 0.02;
+    int captured_times_ = 1;
+
+    std::string tf_file_name_ = "/home/assume/Desktop/TLE_Navigation/src/block_detector/transform/coordinate_tf.csv";
+
+    int dark_h_min_ = 98;
+    int dark_s_min_ = 62;
+    int dark_v_min_ = 105;
+    int dark_h_max_ = 132;
+    int dark_s_max_ = 255;
+    int dark_v_max_ = 255;
+
+    int light_h_min_ = 78;
+    int light_s_min_ = 64;
+    int light_v_min_ = 120;
+    int light_h_max_ = 96;
+    int light_s_max_ = 198;
+    int light_v_max_ = 255;
+
+    int threshold_canny_1_ = 15;
+    int threshold_canny_2_ = 10;
+
+    int threshold_min_ = 50;
+    int threshold_max_ = 255;
 };
