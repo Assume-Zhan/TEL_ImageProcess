@@ -65,9 +65,9 @@ bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res)
         bool ret = camera.read(frame);
         std::map<char, cv::Point2d> block_point_world;
         block_point_world = this->transformation(this->blocks_catch(this->preprocess(frame)));
-        ROS_DEBUG_STREAM("Time " << times << ":");
+        ROS_INFO_STREAM("Time " << times << ":");
         for(auto x : block_point_world){
-            ROS_DEBUG_STREAM("   Block : " << x.first << " , at : " << x.second);
+            ROS_INFO_STREAM("   Block : " << x.first << " , at : " << x.second);
 
             geometry_msgs::Pose block_pose;
             block_pose.position.x = x.second.x;
