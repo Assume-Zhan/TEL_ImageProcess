@@ -85,7 +85,7 @@ bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res)
         block_pose.position.x = x.second.x;
         block_pose.position.y = x.second.y;
 
-        ROS_DEBUG_STREAM("Block : " << x.first << " , at : " << x.second);
+        ROS_INFO_STREAM("Block : " << x.first << " , at : " << x.second);
 
         res.blockName += x.first;
         res.BlockPts.poses.emplace_back(block_pose);
