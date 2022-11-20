@@ -136,9 +136,6 @@ std::multimap<char, cv::Point2f> BlockDetector::blocks_catch(cv::Mat preprocesse
         }
     }
 
-    // DEBUGMODE : print debug information
-    cv::imshow("new", dp_image);
-
     return block_positions;
 }
 

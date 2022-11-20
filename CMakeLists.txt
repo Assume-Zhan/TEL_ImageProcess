@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(block_detector)
-set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
+set(OpenCV_DIR /usr/lib/aarch64-linux-gnu/cmake/opencv4)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
