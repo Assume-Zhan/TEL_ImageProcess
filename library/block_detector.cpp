@@ -60,6 +60,8 @@ bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res)
     cv::VideoCapture camera(this->cam_index_);
     cv::Mat frame;
 
+    if(req.catchBlockPts == false) return true;
+
     std::map<char, cv::Point2d> multiplePts;
     std::map<char, int> timesPts;
 
@@ -81,14 +83,14 @@ bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res)
         x.second.x /= timesPts[x.first];
         x.second.y /= timesPts[x.first];
 
-        geometry_msgs::Pose block_pose;
-        block_pose.position.x = x.second.x;
-        block_pose.position.y = x.second.y;
+        geometry_msgs::Point block_pose;
+        block_pose.x = x.second.x;
+        block_pose.y = x.second.y;
 
         ROS_DEBUG_STREAM("Block : " << x.first << " , at : " << x.second);
 
         res.blockName += x.first;
-        res.BlockPts.poses.emplace_back(block_pose);
+        res.BlockPts.emplace_back(block_pose);
     }
 
     res.CatchObj = true;

@@ -6,6 +6,7 @@
 
 #include "block_detector/ObjectPt_srv.h"
 #include "geometry_msgs/Pose.h"
+#include "geometry_msgs/Point.h"
 
 #define MAX_COL_CAM 630
 
