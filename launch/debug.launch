@@ -1,9 +1,11 @@
 <launch>
 
+    <arg name="TFpathConfig" default="$(find block_detector)" />
+
     <node pkg="block_detector" type="block_detector_node" name="block_detector_node" output="screen">
-        <param name="debugMode" value="false"/>
+        <param name="debugMode" value="true"/>
         
-        <param name="tf_file_name" value="/home/assume/Desktop/TLE_Navigation/src/block_detector/transform/coordinate_tf.csv"/>
+        <param name="tf_file_name" value="$(arg TFpathConfig)/transform/coordinate_tf.csv"/>
 
         <param name="camera_index" value="0"/>
         <param name="min_area_size" value="550"/>
