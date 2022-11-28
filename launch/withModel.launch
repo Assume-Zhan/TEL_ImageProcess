@@ -34,4 +34,6 @@
         <param name="threshold_max" value="255"/>
     </node>
 
+    <node pkg="model_detect" type="node.py" name="node" output="screen"/>
+
 </launch>

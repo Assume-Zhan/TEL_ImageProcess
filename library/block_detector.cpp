@@ -4,9 +4,12 @@ BlockDetector::BlockDetector(ros::NodeHandle& nh): nh_(nh){
 
     /* Service advertise */
     srv_camera_state_ = nh.advertiseService("getObjectPts", &BlockDetector::camera_srv_cb, this);
+    srv_model_train_ = nh.serviceClient<model_detect::Model_srv>("/Model_srv");
 
     /* Get parameter */
     ros::param::get("~debugMode", this->debugMode_);
+
+    ros::param::get("~usingModel", this->usingModel_);
 
     ros::param::get("~tf_file_name", this->tf_file_name_);
 
@@ -65,23 +68,31 @@ bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res)
     std::map<char, cv::Point2d> multiplePts;
     std::map<char, int> timesPts;
 
-    for(int times = 0; times < this->captured_times_; times++){
-        bool ret = camera.read(frame);
+    if(this->usingModel_){ // TODO
         std::map<char, cv::Point2d> block_point_world;
-        block_point_world = this->transformation(this->blocks_catch(this->preprocess(frame)));
-        ROS_INFO_STREAM("Time " << times << ":");
-        for(auto x : block_point_world){
-            ROS_INFO_STREAM("   Block : " << x.first << " , at : " << x.second);
+        multiplePts = this->transformation(this->transformedModel());
+    }
+    else{
+        for(int times = 0; times < this->captured_times_; times++){
+            bool ret = camera.read(frame);
+            std::map<char, cv::Point2d> block_point_world;
+            block_point_world = this->transformation(this->blocks_catch(this->preprocess(frame)));
+            ROS_INFO_STREAM("Time " << times << ":");
+            for(auto x : block_point_world){
+                ROS_INFO_STREAM("   Block : " << x.first << " , at : " << x.second);
 
-            multiplePts[x.first].x += x.second.x;
-            multiplePts[x.first].y += x.second.y;
-            timesPts[x.first]++;
+                multiplePts[x.first].x += x.second.x;
+                multiplePts[x.first].y += x.second.y;
+                timesPts[x.first]++;
+            }
         }
     }
 
     for(auto& x : multiplePts){
-        x.second.x /= timesPts[x.first];
-        x.second.y /= timesPts[x.first];
+        if(!this->usingModel_ /* not using model */){
+            x.second.x /= timesPts[x.first];
+            x.second.y /= timesPts[x.first];
+        }
 
         geometry_msgs::Point block_pose;
         block_pose.x = x.second.x;
@@ -134,7 +145,6 @@ cv::Mat BlockDetector::preprocess(cv::Mat frame){
     return thresholded;
 
 }
-
 
 std::multimap<char, cv::Point2f> BlockDetector::blocks_catch(cv::Mat preprocessed_img){
 
@@ -243,6 +253,29 @@ std::map<char, cv::Point2d> BlockDetector::transformation(std::multimap<char, cv
     return Positions;
 }
 
+
+std::multimap<char, cv::Point2f> BlockDetector::transformedModel(){
+    model_detect::Model_srv srv;
+
+    srv.request.detect_now = true;
+
+    for(int i = 0; i < 30; i++){
+        if(this->srv_model_train_.call(srv)) break;
+    }
+
+    std::multimap<char, cv::Point2f> BlockPositions;
+    std::string basic = "TELFC";
+    int index = 0;
+    for(auto Position : srv.response.block_at_frame){
+        cv::Point2d point;
+        point.x = Position.x;
+        point.y = Position.y;
+
+        BlockPositions.insert({basic[index++], point});
+    }
+
+    return BlockPositions;
+}
 
 void BlockDetector::get_tf_points(std::string filePath){
     std::ifstream tf_file(filePath);
