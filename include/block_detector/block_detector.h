@@ -5,6 +5,7 @@
 #include <map>
 
 #include "block_detector/ObjectPt_srv.h"
+#include "model_detect/Model_srv.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Point.h"
 
@@ -66,6 +67,13 @@ private:
     std::map<char, cv::Point2d> transformation(std::multimap<char, cv::Point2f> blocks);
 
     /**
+     * @brief Transform from model
+     *
+     * @return std::map<char, cv::Point2d>
+     */
+    std::multimap<char, cv::Point2f> transformedModel();
+
+    /**
      * @brief Get the tf points object
      *
      * @param filename
@@ -74,6 +82,7 @@ private:
 
     ros::NodeHandle nh_;
     ros::ServiceServer srv_camera_state_;
+    ros::ServiceClient srv_model_train_;
 
 
     std::pair<cv::Scalar, cv::Scalar> dark_hsv_min_max_; // HSV {min, max}
@@ -87,6 +96,7 @@ private:
 
     // Parameter get by ros_param
     bool debugMode_ = false;
+    bool usingModel_ = true;
 
     int cam_index_ = 2;
     double min_area_size_ = 100;

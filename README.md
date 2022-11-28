@@ -14,10 +14,15 @@ cv::GaussianBlur(frame, frame, cv::Size(9, 9), 3, 0);
 ```
 
 ### Color filter
+> Mask with light and dark mask
+- Parameter can be modify in launch file
 
 ### Find the bolder
+> Canny 
+- Canny function
 
 ### Threshold
+
 
 ---
 
