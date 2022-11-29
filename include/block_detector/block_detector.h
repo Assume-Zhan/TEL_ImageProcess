@@ -87,6 +87,7 @@ private:
 
     std::pair<cv::Scalar, cv::Scalar> dark_hsv_min_max_; // HSV {min, max}
     std::pair<cv::Scalar, cv::Scalar> light_hsv_min_max_;
+    std::pair<cv::Scalar, cv::Scalar> eblock_hsv_min_max_; // HSV {min, max}
 
     std::pair<double, double> cam_world_x[MAX_COL_CAM];
     std::pair<double, double> cam_world_y[MAX_COL_CAM];

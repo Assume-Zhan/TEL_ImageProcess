@@ -9,7 +9,7 @@
         
         <param name="tf_file_name" value="$(arg TFpathConfig)/transform/coordinate_tf.csv"/>
 
-        <param name="camera_index" value="0"/>
+        <param name="camera_index" value="2"/>
         <param name="min_area_size" value="550"/>
         <param name="contour_epsilon_mul" value="0.03"/>
         <param name="captured_times" value="1"/>
@@ -33,5 +33,7 @@
         <param name="threshold_min" value="50"/>
         <param name="threshold_max" value="255"/>
     </node>
+
+    <node name="model_detect_node" pkg="model_detect" type="node.py" output="screen"/>
 
 </launch>

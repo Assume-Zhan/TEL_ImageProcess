@@ -120,17 +120,27 @@ cv::Mat BlockDetector::preprocess(cv::Mat frame){
     // Covert color from BGR to HSV
     cv::cvtColor(frame, frame, cv::COLOR_BGR2HSV);
 
-    // Filter unnecessary color
+    // Filter unnecessary color --> for TL
     cv::Mat maskDark, maskLight, mask;
-    cv::Mat filtered = cv::Mat::zeros(frame.size(), CV_8UC3);
+    cv::Mat filteredTL = cv::Mat::zeros(frame.size(), CV_8UC3);
 
     // Get dark and light mask
     cv::inRange(frame, this->dark_hsv_min_max_.first, this->dark_hsv_min_max_.second, maskDark);
     cv::inRange(frame, this->light_hsv_min_max_.first, this->light_hsv_min_max_.second, maskLight);
 
-    // Get the highest mask and mask the frame
     cv::bitwise_or(maskDark, maskLight, mask);
-    cv::bitwise_and(frame, frame, filtered, mask); // Result must be defined all zero
+    cv::bitwise_and(frame, frame, filteredTL, mask); // Result must be defined all zero
+
+    // Filter unnecessary color --> for E
+    cv::Mat maskE;
+    cv::Mat filteredE = cv::Mat::zeros(frame.size(), CV_8UC3);
+    cv::inRange(frame, this->eblock_hsv_min_max_.first, this->eblock_hsv_min_max_.second, maskE);
+
+    cv::bitwise_and(frame, frame, filteredE, maskE);
+
+    // Combined the 2 masks
+    cv::Mat filtered = cv::Mat::zeros(frame.size(), CV_8UC3);
+    cv::bitwise_or(filteredTL, filteredE, filtered);
 
     // Find the bolder of the result
     // Output canny
@@ -300,27 +310,37 @@ void BlockDetector::get_tf_points(std::string filePath){
 
 
 void BlockDetector::debug(){
-    cv::VideoCapture camera(this->cam_index_);
-    cv::Mat frame;
-
-    while(true){
-        bool ret = camera.read(frame);
-        cv::imshow("origin_frame", frame);
-
-        // Preprocess the frame
-        frame = this->preprocess(frame);
-        std::multimap<char, cv::Point2f> block_point_cam = this->blocks_catch(frame);
-
-        cv::imshow("frame", frame);
-
-        char event = cv::waitKey(1);
-        if(event == 'w'){
-            std::map<char, cv::Point2d> block_point_world = this->transformation(block_point_cam);
+    if(this->usingModel_){
+        while(true){
+            std::map<char, cv::Point2d> block_point_world = this->transformation(this->transformedModel());
             for(auto x : block_point_world){
                 ROS_DEBUG_STREAM("Block : " << x.first << " , at : " << x.second);
             }
         }
-        else if(event == 'q') break;
+    }
+    else{
+        cv::VideoCapture camera(this->cam_index_);
+        cv::Mat frame;
 
+        while(true){
+            bool ret = camera.read(frame);
+            cv::imshow("origin_frame", frame);
+
+            // Preprocess the frame
+            frame = this->preprocess(frame);
+            std::multimap<char, cv::Point2f> block_point_cam = this->blocks_catch(frame);
+
+            cv::imshow("frame", frame);
+
+            char event = cv::waitKey(1);
+            if(event == 'w'){
+                std::map<char, cv::Point2d> block_point_world = this->transformation(block_point_cam);
+                for(auto x : block_point_world){
+                    ROS_DEBUG_STREAM("Block : " << x.first << " , at : " << x.second);
+                }
+            }
+            else if(event == 'q') break;
+
+        }
     }
 }
