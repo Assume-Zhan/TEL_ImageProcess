@@ -60,7 +60,6 @@ void BlockDetector::holdOnFunc(){
 
 bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res){
     // Open the camera
-    cv::VideoCapture camera(this->cam_index_);
     cv::Mat frame;
 
     if(req.catchBlockPts == false) return true;
@@ -73,6 +72,7 @@ bool BlockDetector::camera_srv_cb(bdr_srv::Request& req, bdr_srv::Response& res)
         multiplePts = this->transformation(this->transformedModel());
     }
     else{
+        cv::VideoCapture camera(this->cam_index_);
         for(int times = 0; times < this->captured_times_; times++){
             bool ret = camera.read(frame);
             std::map<char, cv::Point2d> block_point_world;
